@@ -11,13 +11,14 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using System.Security.Permissions;
-
+using System.Drawing.Imaging;
+using System.Text.RegularExpressions;
 
 namespace webcam
 {
     public partial class Form1 : Form
     {
-        Capture captura;
+        Emgu.CV.Capture captura;
         SaveFileDialog guardado = new SaveFileDialog();
 
         public Form1()
@@ -39,9 +40,6 @@ namespace webcam
             }
             captura.ImageGrabbed += activarWebCam;
             captura.Start();
-
-            
-            
         }
 
         private void activarWebCam(object sender, EventArgs e)
@@ -65,22 +63,30 @@ namespace webcam
             if (captura != null)
             {
                 captura = null;
+                
             }
+            
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            var hora = DateTime.Now;
-            guardado.Filter = "Formato JPG| .txt";
+
+            guardado.Filter = "Format jpg|.jpg";
             guardado.Title = "Guardar como:";
-            var todo = pictureBox1.Image;
-            guardado.FileName{
-                todo.Save();
+            var hora = DateTime.Now;
+           // string result=Regex.Replace(hora,@"[^\w\d]", "-");
+            guardado.FileName = hora.ToString("dd-mm-yyyy_hh-mm");
+
+            if (guardado.ShowDialog() == DialogResult.OK)
+            {
+                Mat img = new Mat();
+                captura.Retrieve(img);
+                pictureBox1.Image = img.ToImage<Bgr, byte>().Bitmap;
+                
+                pictureBox1.Image.Save(guardado.FileName, System.Drawing.Imaging.ImageFormat.Jpeg);
+
             }
-            //using (StreamWriter foto = new StreamWriter(guardado.FileName))
-            //{
-            //    foto
-            //}
+               
         }
     }
 }
